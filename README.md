@@ -13,6 +13,12 @@
 
 ![工作台](docs/images/workbench.jpg)
 
+**41 秒产品宣传片**（苹果发布会风格，全片素材均为本产品真实渲染）：
+
+<video src="https://raw.githubusercontent.com/facadefish/xhs-card-studio/main/docs/promo-720p.mp4" controls muted width="100%"></video>
+
+> 视频不加载？[点这里直接观看](docs/promo-720p.mp4)（[1080p 原版见 Release](https://github.com/facadefish/xhs-card-studio/releases/tag/v0.0.1)）
+
 ## 快速开始
 
 ### 方式一：免安装便捷包（推荐，零门槛）
