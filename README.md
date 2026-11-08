@@ -17,7 +17,7 @@
 
 ### 方式一：免安装便捷包（推荐，零门槛）
 
-1. 在 [Releases](../../releases) 下载 `小红书图文助手-v0.0.1-windows.zip`
+1. 在 [Releases](../../releases) 下载 `xhs-card-studio-v0.0.1-windows.zip`
 2. 解压到任意目录（U 盘也行）
 3. **双击 `小红书图文助手.exe`** → 浏览器自动打开工作台
 
