@@ -23,9 +23,17 @@
 
 ### 方式一：免安装便捷包（推荐，零门槛）
 
-1. 在 [Releases](../../releases) 下载 `xhs-card-studio-v0.0.1-windows.zip`
+1. 在 [Releases](../../releases) 下载对应平台的便捷包：
+
+   | 平台 | 文件 |
+   |---|---|
+   | Windows | `xhs-card-studio-v0.0.1-windows.zip` |
+   | macOS（Apple Silicon） | `xhs-card-studio-v0.0.1-macos-arm64.zip` |
+   | macOS（Intel） | `xhs-card-studio-v0.0.1-macos-intel.zip` |
+   | Linux | `xhs-card-studio-v0.0.1-linux.zip` |
+
 2. 解压到任意目录（U 盘也行）
-3. **双击 `小红书图文助手.exe`** → 浏览器自动打开工作台
+3. **双击启动**（Windows 点 `小红书图文助手.exe`，macOS 点 `启动工作台.command`，Linux 跑 `./启动工作台.sh`）→ 浏览器自动打开工作台
 
 > 无需安装 Python、Node 或任何依赖。关闭黑色控制台窗口即停止。
 > 若杀毒软件误报（PyInstaller 单文件常见误报），加白名单即可；不放心可用方式二从源码启动。
@@ -104,8 +112,8 @@ uv run python scripts/e2e_gallery.py                 # 20 套模板逐套截图
 **Q: 便携版杀软误报？**
 PyInstaller 单文件 exe 的常见误报。加白名单，或改用源码方式运行（`python web/serve.py`），两者功能完全一致。
 
-**Q: Mac / Linux？**
-源码方式可直接运行（`python3 web/serve.py`），无任何平台相关代码。便捷包目前只打了 Windows 版。
+**Q: macOS 提示「无法验证开发者」？**
+便捷包未做 Apple 公证。右键程序 →「打开」即可；或终端执行 `xattr -dr com.apple.quarantine <解压目录>`。
 
 **Q: 导出的卡片尺寸？**
 1242×1656（小红书 3:4），3x 渲染输出 2484×3312 PNG。
@@ -114,7 +122,7 @@ PyInstaller 单文件 exe 的常见误报。加白名单，或改用源码方式
 
 - [ ] 更多模板与配色（欢迎投稿）
 - [ ] 自定义字体上传
-- [ ] Mac / Linux 便捷包
+- [x] Mac / Linux 便捷包（CI 三平台自动打包）
 - [ ] 长图拼接导出
 
 ## License
