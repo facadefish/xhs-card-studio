@@ -1,0 +1,63 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "补传资产的 Release tag（如 v0.0.1）"
+        required: true
+        default: "v0.0.1"
+
+permissions:
+  contents: write
+
+env:
+  VERSION: ${{ github.ref_type == 'tag' && github.ref_name || inputs.tag }}
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: windows-latest, platform: windows, sep: ";", exe: "小红书图文助手.exe", launcher: "启动工作台.bat" }
+          - { os: macos-latest, platform: macos-arm64, sep: ":", exe: "小红书图文助手", launcher: "启动工作台.command" }
+          - { os: macos-13, platform: macos-intel, sep: ":", exe: "小红书图文助手", launcher: "启动工作台.command" }
+          - { os: ubuntu-latest, platform: linux, sep: ":", exe: "小红书图文助手", launcher: "启动工作台.sh" }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+
+      - name: Build binary
+        run: python -m PyInstaller --onefile --noconfirm --clean --paths web --add-data "web${{ matrix.sep }}web" --name "小红书图文助手" --distpath dist launcher.py
+
+      - name: Assemble package
+        shell: bash
+        run: |
+          set -e
+          PKG="dist/pkg/xhs-card-studio-${VERSION}-${{ matrix.platform }}"
+          mkdir -p "$PKG/examples"
+          cp "dist/${{ matrix.exe }}" "$PKG/"
+          cp "packaging/${{ matrix.launcher }}" "packaging/使用说明.txt" "$PKG/"
+          cp sample.md "$PKG/"
+          cp examples/0.png "$PKG/examples/"
+          [ -f "$PKG/${{ matrix.launcher }}" ] && chmod +x "$PKG/${{ matrix.launcher }}" || true
+          [ -f "$PKG/小红书图文助手" ] && chmod +x "$PKG/小红书图文助手" || true
+          python scripts/make_release_zip.py "$PKG" "dist/xhs-card-studio-${VERSION}-${{ matrix.platform }}.zip"
+
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.VERSION }}
+          files: dist/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
