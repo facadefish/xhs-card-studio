@@ -15,9 +15,9 @@
 
 **41 秒产品宣传片**（苹果发布会风格，全片素材均为本产品真实渲染）：
 
-<video src="https://raw.githubusercontent.com/facadefish/xhs-card-studio/main/docs/promo-720p.mp4" controls muted width="100%"></video>
+[![产品宣传片（4 倍速预览，点击查看完整版）](docs/promo-preview.gif)](docs/promo-720p.mp4)
 
-> 视频不加载？[点这里直接观看](docs/promo-720p.mp4)（[1080p 原版见 Release](https://github.com/facadefish/xhs-card-studio/releases/tag/v0.0.1)）
+> ▲ 4 倍速预览动图，[点击观看 41s 完整版（720p）](docs/promo-720p.mp4) ｜ [1080p 原版见 Release](https://github.com/facadefish/xhs-card-studio/releases/tag/v0.0.1)
 
 ## 快速开始
 
