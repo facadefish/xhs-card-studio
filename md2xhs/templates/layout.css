@@ -1,0 +1,38 @@
+/* ===== 版心布局（与主题无关，勿改） =====
+   可调参数以 CSS 变量形式挂在 .page 上，工作台/模板注入同名变量即可覆盖。 */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { background: #888; }
+.page {
+  --pad-top: 96px;
+  --pad-bottom: 132px;
+  --pad-x: 84px;
+  width: 1242px;
+  height: 1656px;
+  position: relative;
+  overflow: hidden;
+  background: #fff;
+}
+.page.long { height: auto; min-height: 1656px; }
+.page .pad { padding: var(--pad-top) var(--pad-x) var(--pad-bottom); height: 100%; }
+.page.long .pad { height: auto; min-height: 1656px; }
+.page .pageno {
+  position: absolute;
+  bottom: 52px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 26px;
+  letter-spacing: 2px;
+}
+/* 量尺：结构与真实页面完全一致（class 复用），离屏、高度自适应，
+   保证分页测量环境与截图环境零偏差。垂直 padding 置 0 ——
+   测量基准从内容区顶部开始，与 AVAIL_H 对应。 */
+#measure.page {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+}
+#measure .pad { height: auto; min-height: 0; padding: 0 var(--pad-x); }

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>模板画廊（截图对比用）</title>
+<style>
+body { background:#666; margin:0; padding:24px; font-family:"Microsoft YaHei",sans-serif; }
+.shot { display:inline-block; vertical-align:top; margin:0 24px 32px 0; width:621px; }
+.shot .cap { color:#fff; font-size:14px; margin-bottom:6px; }
+.shot .page { transform:scale(.5); transform-origin:0 0; }
+</style>
+</head>
+<body>
+<script src="templates.js"></script>
+<script src="engine.js"></script>
+<script>
+/* 每套模板用同样的示例内容渲染，供与参考图对比 */
+const SAMPLE = [
+  { id:"b1", html:"<h2>为什么选这些装备</h2>" },
+  { id:"b2", html:"<p>露营的核心是<strong>轻量化</strong>与可靠性之间的平衡，先从三大件说起。</p>" },
+  { id:"b3", html:"<ul><li>帐篷：三季帐足够应付大多数场景</li><li>睡袋：温标比颜值重要</li><li>炉具：分体式更稳</li></ul>" },
+  { id:"b4", html:"<p>第二段内容，用来观察段间距与卡壳的留白气质。</p>" },
+];
+const END_SAMPLE = [
+  { id:"e1", html:"<p>如果觉得有用，欢迎收藏点赞，我们下篇见。</p>" },
+];
+const styleEl = document.createElement("style");
+styleEl.textContent = ALL_CSS;
+document.head.appendChild(styleEl);
+for (const t of TPL) {
+  const d = { v:2, palette:"minimal", customBg:null, customAccent:null, ratio:"3:4",
+    font:"", fsBody:34, lhBody:1.85, gapBlock:28,
+    meta:{ title:"秋日露营装备清单", author:"户外小队长" },
+    pages:[], assign:{}, blocks: t.kind === "end" ? END_SAMPLE : SAMPLE };
+  const page = { id:"g-" + t.id, templateId:t.id, overrides:{}, locks:[],
+    title: t.slots.title ? d.meta.title : "", images:{} };
+  d.pages = [page];
+  d.assign[page.id] = t.slots.body ? d.blocks.map(b => b.id) : [];
+  const wrap = document.createElement("div");
+  wrap.className = "shot";
+  wrap.dataset.tid = t.id;
+  const cap = document.createElement("div");
+  cap.className = "cap";
+  cap.textContent = t.id + " · " + t.name;
+  const inner = buildPageDOM(d, page);
+  wrap.appendChild(cap);
+  wrap.appendChild(inner);
+  wrap.style.height = (1656 * 0.5 + 24) + "px";
+  document.body.appendChild(wrap);
+}
+window.__ready = true;
+</script>
+</body>
+</html>

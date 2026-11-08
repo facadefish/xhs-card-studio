@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>小红书图文工作室</title>
+<style>
+:root { --bg:#1e1f22; --panel:#26272b; --line:#3a3b40; --ink:#e8e8ea; --muted:#9a9ba0; --accent:#ff2442; --blue:#4da3ff; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--ink); font:14px/1.5 "Microsoft YaHei",sans-serif; height:100vh; overflow:hidden; display:flex; flex-direction:column; }
+button { background:#333438; color:var(--ink); border:1px solid var(--line); border-radius:6px; padding:6px 12px; cursor:pointer; font-size:13px; }
+button:hover { background:#3f4046; }
+button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+button.on { border-color:var(--blue); color:var(--blue); }
+input,select { background:#1a1b1e; color:var(--ink); border:1px solid var(--line); border-radius:6px; padding:5px 8px; font-size:13px; }
+input[type=range] { padding:0; }
+label { color:var(--muted); font-size:12px; display:flex; align-items:center; gap:6px; }
+
+#bar { display:flex; align-items:center; gap:8px; padding:8px 12px; background:var(--panel); border-bottom:1px solid var(--line); flex-wrap:wrap; }
+#bar .sep { width:1px; height:20px; background:var(--line); }
+#bar input[type=text] { width:110px; }
+
+#main { flex:1; display:flex; min-height:0; }
+#film { width:150px; border-right:1px solid var(--line); background:var(--panel); overflow-y:auto; padding:10px; display:flex; flex-direction:column; gap:10px; }
+#film .thumb { position:relative; width:130px; cursor:pointer; border:2px solid transparent; border-radius:6px; overflow:hidden; background:#333; flex:none; }
+#film .thumb.sel { border-color:var(--blue); }
+#film .thumb .inner { transform-origin:0 0; }
+#film .thumb .tag { position:absolute; left:4px; top:4px; background:rgba(0,0,0,.55); color:#fff; font-size:10px; padding:1px 6px; border-radius:4px; }
+#film .add { width:130px; }
+
+#stage-wrap { flex:1; position:relative; overflow:auto; background:#333; display:flex; align-items:flex-start; justify-content:center; padding:24px; }
+#holder { position:relative; transform-origin:0 0; flex:none; }
+#holder .page { box-shadow:0 4px 24px rgba(0,0,0,.5); }
+.slot.selected { outline:3px solid var(--blue); outline-offset:2px; z-index:5; }
+.slot [contenteditable="true"] { outline:2px solid var(--blue); }
+.slot-title .t:empty::before { content:"双击输入标题"; color:var(--muted); font-weight:400; font-size:.35em; cursor:text; }
+.rsz { position:absolute; right:-9px; bottom:-9px; width:18px; height:18px; background:var(--blue); border-radius:4px; cursor:nwse-resize; z-index:9; }
+.slot-imgbtn { position:absolute; right:6px; top:6px; z-index:8; background:rgba(0,0,0,.6); color:#fff; border:none; border-radius:4px; padding:3px 8px; font-size:11px; cursor:pointer; }
+
+#side { width:250px; border-left:1px solid var(--line); background:var(--panel); overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:14px; }
+#side h3 { font-size:12px; color:var(--muted); font-weight:600; }
+.tpl-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.tpl-grid button { font-size:12px; padding:6px 4px; }
+.tpl-grid button.cur { border-color:var(--accent); color:var(--accent); }
+.tpl-thumb { cursor:pointer; border:2px solid var(--line); border-radius:6px; overflow:hidden; background:#1a1b1e; }
+.tpl-thumb.cur { border-color:var(--accent); }
+.tpl-thumb.dim { opacity:.35; }
+.tpl-thumb .pv { overflow:hidden; }
+.tpl-thumb .nm { font-size:11px; text-align:center; padding:3px 0; color:var(--muted); }
+.row { display:flex; align-items:center; gap:8px; }
+.row .val { color:var(--ink); font-size:12px; min-width:40px; text-align:right; }
+.grow { flex:1; }
+
+#status { padding:6px 12px; background:var(--panel); border-top:1px solid var(--line); color:var(--muted); font-size:12px; }
+#status .dirty { color:var(--accent); }
+.hidden { display:none !important; }
+</style>
+</head>
+<body>
+<div id="bar">
+  <button id="b-import">导入文章</button>
+  <input type="file" id="f-import" accept=".md,.txt,.markdown" class="hidden">
+  <span class="sep"></span>
+  <label>标题 <input type="text" id="i-title"></label>
+  <label>署名 <input type="text" id="i-author"></label>
+  <span class="sep"></span>
+  <button id="b-undo" title="Ctrl+Z">撤销</button>
+  <button id="b-redo" title="Ctrl+Shift+Z">重做</button>
+  <button id="b-random" title="Space">随机排版</button>
+  <span class="sep"></span>
+  <label>导出 <select id="s-scale"><option value="1">1x</option><option value="2" selected>2x</option></select></label>
+  <button id="b-export" class="primary">导出 ZIP</button>
+  <span class="sep"></span>
+  <span id="savestate" style="color:var(--muted);font-size:12px"></span>
+</div>
+<div id="main">
+  <div id="film"></div>
+  <div id="stage-wrap"><div id="holder"></div></div>
+  <div id="side">
+    <div>
+      <h3>版式模板（点击应用到当前页）</h3>
+      <div id="tplbox"></div>
+    </div>
+    <div>
+      <h3>页面</h3>
+      <div class="row">
+        <button id="b-addpage" class="grow">+ 加正文页</button>
+        <button id="b-addend">+ 结尾页</button>
+        <button id="b-delpage">删页</button>
+      </div>
+    </div>
+    <div>
+      <h3>样式</h3>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <label>配色 <select id="s-palette" class="grow"></select></label>
+        <label><input type="checkbox" id="c-custombg"> 自定义背景 <input type="color" id="i-bg" value="#f6f1e7"></label>
+        <label><input type="checkbox" id="c-customaccent"> 自定义点缀色 <input type="color" id="i-accent" value="#ff2442"></label>
+        <label>比例 <select id="s-ratio" class="grow">
+          <option value="3:4">3:4（小红书）</option><option value="4:5">4:5</option>
+          <option value="1:1">1:1</option><option value="9:16">9:16</option></select></label>
+        <label>字体 <select id="s-font" class="grow">
+          <option value="">默认（雅黑）</option>
+          <option value='"Microsoft YaHei", sans-serif'>微软雅黑</option>
+          <option value="SimSun, serif">宋体</option>
+          <option value="KaiTi, cursive">楷体</option>
+          <option value="SimHei, sans-serif">黑体</option></select></label>
+        <label>正文字号 <span class="val" id="v-fs"></span></label>
+        <input type="range" id="r-fs" min="26" max="44" step="1">
+        <label>行距 <span class="val" id="v-lh"></span></label>
+        <input type="range" id="r-lh" min="1.4" max="2.2" step="0.05">
+        <label>段间距 <span class="val" id="v-gap"></span></label>
+        <input type="range" id="r-gap" min="12" max="48" step="2">
+      </div>
+    </div>
+    <div id="inspector" class="hidden">
+      <h3>选中区块</h3>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="row"><span id="insp-name"></span><label class="grow"></label>
+          <label><input type="checkbox" id="insp-lock"> 锁定</label></div>
+        <label id="insp-size-row">字号 <input type="number" id="insp-size" min="20" max="160" step="2" style="width:70px"> px</label>
+        <button id="insp-img" class="hidden">上传/替换图片…</button>
+        <button id="insp-imgdel" class="hidden">移除图片</button>
+        <input type="file" id="f-slotimg" accept="image/*" class="hidden">
+      </div>
+    </div>
+  </div>
+</div>
+<div id="status">就绪</div>
+<script src="vendor/markdown-it.min.js"></script>
+<script src="templates.js"></script>
+<script src="engine.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

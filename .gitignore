@@ -1,0 +1,19 @@
+.venv/
+__pycache__/
+output/
+*.egg-info/
+
+# 第三方技能与构建产物（不进产品仓库）
+video-shotcraft/
+node_modules/
+dist/
+build/
+*.spec
+*.zip
+
+# 宣传片工程（体量大，制作环境本地保留）
+promo/
+
+# 参考图原始候选（体量大；固化的 references/*.jpg 保留）
+references/raw/
+references/sheets/
